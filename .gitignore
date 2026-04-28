@@ -1,0 +1,23 @@
+.DS_Store
+
+# macOS SwiftPM build output
+.build/
+apps/reactkit-native-macos/.build/
+
+# Local dependencies and generated artifacts
+node_modules/
+packages/reactotron/**/node_modules/
+packages/reactotron/**/dist/
+packages/reactotron/.yarn/cache/
+packages/reactotron/.yarn/unplugged/
+packages/reactotron/.yarn/build-state.yml
+packages/reactotron/.yarn/install-state.gz
+
+# Local logs and temporary files
+*.log
+tmp/
+.tmp/
+
+# Large upstream demo media that is not needed by ReactKit docs
+docs/plugins/images/readme/reactotron-demo-app.gif
+docs/plugins/images/readme/reactotron-demo-cli.gif
