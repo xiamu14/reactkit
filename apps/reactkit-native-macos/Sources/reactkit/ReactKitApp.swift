@@ -169,6 +169,7 @@ struct LucideIcon: View {
         case play
         case trash
         case chevronDown
+        case chevronRight
         case chevronUp
         case network
         case activity
@@ -178,7 +179,7 @@ struct LucideIcon: View {
     var name: Name
     var size: CGFloat = 20
     var color: Color = DesignColor.primary
-    var strokeWidth: CGFloat = 2.15
+    var strokeWidth: CGFloat = 2
 
     var body: some View {
         Canvas { context, canvasSize in
@@ -271,6 +272,8 @@ struct LucideIcon: View {
                 line([point(14, 10), point(14, 17)])
             case .chevronDown:
                 line([point(6, 9), point(12, 15), point(18, 9)])
+            case .chevronRight:
+                line([point(9, 6), point(15, 12), point(9, 18)])
             case .chevronUp:
                 line([point(6, 15), point(12, 9), point(18, 15)])
             case .network:
@@ -593,6 +596,10 @@ enum AppSection: String, CaseIterable, Identifiable {
         case .customCommands: .wandSparkles
         }
     }
+
+    var isEnabled: Bool {
+        self == .timeline
+    }
 }
 
 struct ContentView: View {
@@ -625,31 +632,34 @@ struct SidebarView: View {
         VStack(spacing: 18) {
             ForEach(AppSection.allCases) { section in
                 Button {
-                    model.selectedSection = section
+                    if section.isEnabled {
+                        model.selectedSection = section
+                    }
                 } label: {
                     VStack(spacing: 7) {
                         LucideIcon(
                             name: section.symbol,
-                            size: 19,
-                            color: model.selectedSection == section ? DesignColor.surface : DesignColor.secondary,
-                            strokeWidth: 2.2
+                            size: 24,
+                            color: iconColor(for: section),
+                            strokeWidth: 2
                         )
                         .frame(width: 44, height: 44)
-                        .background(model.selectedSection == section ? DesignColor.primary : DesignColor.surface)
+                        .background(model.selectedSection == section ? DesignColor.primary : DesignColor.surface.opacity(section.isEnabled ? 1 : 0.62))
                             .clipShape(Circle())
                             .overlay(
-                                Circle().stroke(DesignColor.border.opacity(0.8), lineWidth: model.selectedSection == section ? 0 : 1)
+                                Circle().stroke(DesignColor.border.opacity(section.isEnabled ? 0.8 : 0.45), lineWidth: model.selectedSection == section ? 0 : 1)
                             )
 
                         Text(section.rawValue)
                             .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(model.selectedSection == section ? DesignColor.primary : DesignColor.secondary)
+                            .foregroundStyle(labelColor(for: section))
                             .lineLimit(1)
                             .minimumScaleFactor(0.75)
                     }
                     .frame(width: 58)
                 }
                 .buttonStyle(.plain)
+                .disabled(!section.isEnabled)
             }
 
             Spacer()
@@ -657,6 +667,20 @@ struct SidebarView: View {
         .frame(width: 68)
         .padding(.vertical, 14)
         .softRoundedSurface(radius: 28, shadowRadius: 18, shadowY: 8)
+    }
+
+    private func iconColor(for section: AppSection) -> Color {
+        if model.selectedSection == section {
+            return DesignColor.surface
+        }
+        return section.isEnabled ? DesignColor.secondary : DesignColor.muted.opacity(0.58)
+    }
+
+    private func labelColor(for section: AppSection) -> Color {
+        if model.selectedSection == section {
+            return DesignColor.primary
+        }
+        return section.isEnabled ? DesignColor.secondary : DesignColor.muted.opacity(0.62)
     }
 }
 
@@ -730,7 +754,7 @@ struct BrandMark: View {
         ZStack {
             Circle()
                 .fill(DesignColor.primary)
-            LucideIcon(name: .network, size: 30, color: DesignColor.accent, strokeWidth: 2.5)
+            LucideIcon(name: .network, size: 32, color: DesignColor.accent, strokeWidth: 2)
         }
         .frame(width: 64, height: 64)
     }
@@ -744,7 +768,7 @@ struct StatusPill: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            LucideIcon(name: symbol, size: 18, color: color, strokeWidth: 2.25)
+            LucideIcon(name: symbol, size: 24, color: color, strokeWidth: 2)
                 .frame(width: 36, height: 36)
                 .background(color.opacity(0.12))
                 .clipShape(Circle())
@@ -775,7 +799,7 @@ struct SearchField: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            LucideIcon(name: .search, size: 20, color: DesignColor.primary, strokeWidth: 2.4)
+            LucideIcon(name: .search, size: 24, color: DesignColor.primary, strokeWidth: 2)
 
             TextField("Search logs ...", text: $text)
                 .textFieldStyle(.plain)
@@ -800,7 +824,7 @@ struct IconButton: View {
 
     var body: some View {
         Button(action: action) {
-            LucideIcon(name: symbol, size: 18, color: foreground, strokeWidth: 2.3)
+            LucideIcon(name: symbol, size: 24, color: foreground, strokeWidth: 2)
                 .frame(width: 56, height: 56)
                 .background(DesignColor.surface)
                 .clipShape(Circle())
@@ -820,7 +844,7 @@ struct TimelineActionButton: View {
     var body: some View {
         Button(action: action) {
             HStack(spacing: 8) {
-                LucideIcon(name: symbol, size: 15, color: foreground, strokeWidth: 2.35)
+                LucideIcon(name: symbol, size: 24, color: foreground, strokeWidth: 2)
                 Text(title)
                     .font(.system(size: 13, weight: .semibold))
                     .lineLimit(1)
@@ -878,7 +902,7 @@ struct EmptyConnectionCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                LucideIcon(name: .phoneOff, size: 20, color: DesignColor.accent, strokeWidth: 2.25)
+                LucideIcon(name: .phoneOff, size: 24, color: DesignColor.accent, strokeWidth: 2)
                     .frame(width: 42, height: 42)
                     .background(DesignColor.accentSoft)
                     .clipShape(Circle())
@@ -907,22 +931,22 @@ struct ConnectionRow: View {
 
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 14) {
-                ZStack(alignment: .bottomTrailing) {
-                    LucideIcon(name: .smartphone, size: 28, color: DesignColor.secondary, strokeWidth: 2.15)
-                        .frame(width: 42, height: 52)
-                    Circle()
-                        .fill(connection.connected ? DesignColor.success : DesignColor.muted)
-                        .frame(width: 12, height: 12)
-                        .overlay(Circle().stroke(DesignColor.surface, lineWidth: 2))
-                }
-                .frame(width: 42, height: 52)
+            HStack(spacing: 12) {
+                LucideIcon(name: .smartphone, size: 24, color: DesignColor.secondary, strokeWidth: 2)
+                    .frame(width: 32, height: 40)
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(connection.name)
-                        .font(.system(size: 14, weight: .semibold))
-                        .foregroundStyle(DesignColor.primary)
-                        .lineLimit(1)
+                    HStack(spacing: 7) {
+                        Circle()
+                            .fill(connection.connected ? DesignColor.success : DesignColor.muted)
+                            .frame(width: 8, height: 8)
+
+                        Text(connection.name)
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundStyle(DesignColor.primary)
+                            .lineLimit(1)
+                    }
+
                     Text("\(connection.platform.capitalized) \(connection.platformVersion ?? "")")
                         .font(.system(size: 12))
                         .foregroundStyle(DesignColor.secondary)
@@ -930,9 +954,10 @@ struct ConnectionRow: View {
                 }
                 Spacer()
             }
-            .padding(14)
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
             .background(isSelected ? DesignColor.accentSoft.opacity(0.82) : DesignColor.surfaceSoft.opacity(0.62))
-            .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         }
         .buttonStyle(.plain)
     }
@@ -1032,7 +1057,7 @@ struct FilterPill: View {
 
     var body: some View {
         HStack(spacing: 8) {
-            LucideIcon(name: symbol, size: 15, color: DesignColor.primary, strokeWidth: 2.25)
+            LucideIcon(name: symbol, size: 24, color: DesignColor.primary, strokeWidth: 2)
             Text(title)
                 .font(.system(size: 13, weight: .medium))
         }
@@ -1052,9 +1077,9 @@ struct TimelineEmptyState: View {
             VStack(spacing: 18) {
                 LucideIcon(
                     name: model.connections.isEmpty ? .activity : .list,
-                    size: 54,
+                    size: 48,
                     color: DesignColor.primary.opacity(0.58),
-                    strokeWidth: 2.45
+                    strokeWidth: 2
                 )
                 .frame(width: 78, height: 78)
                 .background(DesignColor.surfaceSoft.opacity(0.46))
@@ -1245,9 +1270,11 @@ struct LogRow: View {
             Text(log.summary)
                 .font(.system(size: 13, weight: .regular, design: .monospaced))
                 .foregroundStyle(DesignColor.secondary)
-                .lineLimit(1)
-                .textSelection(.enabled)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .lineLimit(2)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity, minHeight: 38, maxHeight: 38, alignment: .topLeading)
+                .clipped()
+                .allowsHitTesting(false)
                 .contextMenu {
                     Button("Copy log") {
                         copyToPasteboard(copyText)
@@ -1258,20 +1285,23 @@ struct LogRow: View {
                 detailLog = log
             } label: {
                 LucideIcon(
-                    name: .chevronDown,
-                    size: 15,
+                    name: .chevronRight,
+                    size: 24,
                     color: DesignColor.muted,
-                    strokeWidth: 2.3
+                    strokeWidth: 2
                 )
                     .frame(width: 24, height: 24)
             }
             .buttonStyle(.plain)
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 18)
-        .frame(minHeight: 72)
+        .padding(.vertical, 16)
+        .frame(minHeight: 88)
         .background(DesignColor.surface)
-        .textSelection(.enabled)
+        .contentShape(Rectangle())
+        .onTapGesture {
+            detailLog = log
+        }
         .contextMenu {
             Button("Copy log") {
                 copyToPasteboard(copyText)
