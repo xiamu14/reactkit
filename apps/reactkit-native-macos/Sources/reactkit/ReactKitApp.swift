@@ -1094,21 +1094,13 @@ struct LogDetailModal: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 14) {
-                VStack(alignment: .leading, spacing: 4) {
-                    HStack(spacing: 10) {
-                        Text(typeText)
-                            .font(.system(size: 13, weight: .semibold))
-                            .foregroundStyle(typeColor)
-                        Text(timeText)
-                            .font(.system(size: 12, weight: .regular, design: .monospaced))
-                            .foregroundStyle(DesignColor.secondary)
-                    }
-
-                    Text(log.summary)
-                        .font(.system(size: 13, weight: .regular, design: .monospaced))
+                HStack(spacing: 10) {
+                    Text(typeText)
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(typeColor)
+                    Text(timeText)
+                        .font(.system(size: 12, weight: .regular, design: .monospaced))
                         .foregroundStyle(DesignColor.secondary)
-                        .lineLimit(2)
-                        .textSelection(.enabled)
                 }
 
                 Spacer()
@@ -1250,7 +1242,17 @@ struct LogRow: View {
                 .foregroundStyle(typeColor(log.type))
                 .frame(width: 88, alignment: .leading)
 
-            Spacer(minLength: 0)
+            Text(log.summary)
+                .font(.system(size: 13, weight: .regular, design: .monospaced))
+                .foregroundStyle(DesignColor.secondary)
+                .lineLimit(1)
+                .textSelection(.enabled)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .contextMenu {
+                    Button("Copy log") {
+                        copyToPasteboard(copyText)
+                    }
+                }
 
             Button {
                 detailLog = log
